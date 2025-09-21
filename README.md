@@ -1,3 +1,10 @@
+## start convex database
+To start the convex database, run the following command in your terminal:
+
+```bash 
+npx convex dev
+```
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
