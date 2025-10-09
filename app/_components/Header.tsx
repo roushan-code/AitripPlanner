@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
-import { SignInButton, useUser } from '@clerk/nextjs'
+import { SignInButton, UserButton, useUser } from '@clerk/nextjs'
+import { usePathname } from 'next/navigation'
 
 const menuOptions = [
     { name: "Home", href: "/" },
@@ -13,12 +14,16 @@ const menuOptions = [
 
 const Header = () => {
     const {user} = useUser();
+    const path = usePathname();
+    // console.log('Current Path:', path);
     return (
         <div className='flex justify-between items-center p-4'>
             {/* LOGO */}
             <div className='flex items-center gap-2'>
                 <Image src={"/logo.svg"} alt='logo' width={30} height={30} />
+                <Link href={'/'}>
                 <h1 className='font-bold text-2xl hover:text-primary'>AI Trip Planner</h1>
+                </Link>
             </div>
             {/* MENU OPTIONS */}
             <div className='flex items-center gap-6'>
@@ -30,13 +35,19 @@ const Header = () => {
             </div>
 
             {/* Get Started BUTTONS */}
+            <div className='flex items-center gap-4'>
                 {!user ? <SignInButton mode='modal'>
                     <Button className='cursor-pointer'>Get Started</Button>
-                </SignInButton> :
+                </SignInButton> : path !== '/create-new-trip' ? 
+                <Link href={'/my-trips'}>
+                    <Button className='cursor-pointer'>My Trips</Button>
+                </Link> :
                     <Link href={'/create-new-trip'}>
                         <Button className='cursor-pointer'>Create New Trip</Button>
                     </Link>
                 }
+                <UserButton  />
+            </div>
 
 
         </div>

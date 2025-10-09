@@ -3,16 +3,15 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import axios from 'axios'
 import { Loader, Send } from 'lucide-react'
-import React, { use, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import EmptyBoxState from './EmptyBoxState'
 import GroupSizeUi from './GroupSizeUi'
 import BudgetUi from './BudgetUi'
 import SelectDays from './SelectDays'
 import Final from './Final'
-import { on } from 'events'
 import { useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
-import { useUserDetail } from '@/app/provider'
+import { useUserDetail, useTripDetail } from '@/app/provider'
 import { v4 as uuidv4 } from 'uuid';
 
 type Message = {
@@ -30,6 +29,20 @@ export type TripInfo = {
     hotels: any;
     itinerary: any;
 }
+
+export type Hotel = {
+    hotel_name: string;
+    hotel_address: string;
+    price_per_night: string;
+    hotel_image_url: string;
+    geo_coordinates: {
+        latitude: number;
+        longitude: number;
+    };
+    rating: number;
+    description: string;
+}
+
 const ChatBox = () => {
     const [message, setMessage] = React.useState<Message[]>([]);
     const [userInput, setUserInput] = React.useState<string>('');
@@ -38,7 +51,9 @@ const ChatBox = () => {
     const [tripDetails, setTripDetails] = React.useState<TripInfo>();
 
     const SaveTripDetails = useMutation(api.tripDetails.CreateTripDetails)
-    const {userDetail, setUserDetails} = useUserDetail();
+    const {userDetail, setUserDetail} = useUserDetail();
+    const tripDetailContext = useTripDetail();
+    const setGlobalTripDetail = tripDetailContext?.setTripDetailInfo;
 
     const onSend = async (input?: string) => {
         const value = input !== undefined ? input : userInput;
@@ -54,7 +69,7 @@ const ChatBox = () => {
         const updatedMessages = [...message, newMsg];
         setMessage(updatedMessages);
         // Call API to send message to AI and get response
-        console.log(updatedMessages);
+        // console.log(updatedMessages);
         const result = await axios.post('/api/gemini', { messages: updatedMessages, isFinal: isFinal });
 
         !isFinal && setMessage((prev: Message[]) => [...prev, {
@@ -65,6 +80,10 @@ const ChatBox = () => {
 
         if(isFinal){
             setTripDetails(result?.data?.trip_plan);
+            // Set to global context
+            if (setGlobalTripDetail) {
+                setGlobalTripDetail(result?.data?.trip_plan);
+            }
             await SaveTripDetails({
                 tripId: uuidv4(),
                 tripDetails: result?.data?.trip_plan,
@@ -73,8 +92,8 @@ const ChatBox = () => {
 
         }
         setLoading(false);
-        console.log(result)
-        console.log(result?.data?.resp);
+        // console.log(result)
+        // console.log(result?.data?.resp);
     }
 
     const RenderGenerativeUi = (ui: string) => {

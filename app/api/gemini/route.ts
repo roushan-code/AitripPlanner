@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenAI } from '@google/genai'
+import { auth, currentUser } from '@clerk/nextjs/server';
+import { aj } from '../arcjet/route';
 
 const systemPrompt = `
 You are an AI Trip Planner Agent. Your goal is to help the user plan a trip by asking one relevant trip-related question at a time.
@@ -36,9 +38,15 @@ Never return any value for "ui" except: "groupSize", "budget", "TripDuration", "
 Return only the JSON object, with no extra text or explanation.
 `
 
-const FINAL_PROMPT = `Generate Travel Plan with give details, give me Hotels options list with HotelName, Hotel address, Price, hotel image url, geo coordinates, rating, descriptions and  suggest itinerary with placeName, Place Details, Place Image Url, Geo Coordinates,Place address, ticket Pricing, Time travel each of the location , with each day plan with best time to visit in JSON format.
+const FINAL_PROMPT = `Generate Travel Plan with given details, give me Hotels options list with HotelName, Hotel address, Price, hotel image url, geo coordinates, rating, descriptions and suggest itinerary with placeName, Place Details, Place Image Url, Geo Coordinates, Place address, ticket Pricing, Time travel each of the location, with each day plan with best time to visit in JSON format.
 
- Output Schema:
+IMPORTANT: For hotel_image_url and place_image_url fields:
+- Do NOT use placeholder URLs like "https://example.com/..." 
+- Use real, working image URLs from hotel booking sites, tourism websites, or Google Images if you know them
+- If you don't have access to real image URLs, set these fields to empty strings: ""
+- Never use fake or placeholder URLs
+
+Output Schema:
  {
   "trip_plan": {
     "destination": "string",
@@ -93,7 +101,17 @@ const genAI = new GoogleGenAI({
 
 export async function POST(request: NextRequest) {
     const { messages, isFinal } = await request.json();
-    console.log('Received messages:', messages);
+    const user = await currentUser();
+    const {has} = await auth();
+    const hasPremiumAccess = has({ plan: 'monthly' })
+    const decision = await aj.protect(request, { userId: user?.primaryEmailAddress?.emailAddress ?? '', requested: isFinal ? 5 : 0 });
+
+    // console.log("Arcjet decision", decision);
+
+    if (decision.conclusion === 'DENY' && !hasPremiumAccess) {
+        return NextResponse.json({ resp: "You have exceeded your daily limit. Please upgrade your plan.", ui: "Limit" });
+    }
+    
     try {
         // Convert messages to Gemini format (only 'user' and 'model' roles allowed)
         const geminiMessages = [];
@@ -125,7 +143,7 @@ export async function POST(request: NextRequest) {
             }
         }
         
-        console.log('Gemini formatted messages:', JSON.stringify(geminiMessages));
+        // console.log('Gemini formatted messages:', JSON.stringify(geminiMessages));
         
         const response = await genAI.models.generateContent({
             model: 'gemini-2.5-flash',
@@ -133,7 +151,7 @@ export async function POST(request: NextRequest) {
         });
         
         const responseText = response.text;
-        console.log('Raw Gemini response:', responseText);
+        // console.log('Raw Gemini response:', responseText);
         
         if (!responseText) {
             throw new Error('No response received from AI model');
