@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenAI } from '@google/genai'
 import { auth, currentUser } from '@clerk/nextjs/server';
-import { aj } from '../arcjet/route';
+import arcjet, { tokenBucket } from "@arcjet/next";
 
 const systemPrompt = `
 You are an AI Trip Planner Agent. Your goal is to help the user plan a trip by asking one relevant trip-related question at a time.
@@ -97,6 +97,21 @@ Output Schema:
 
 const genAI = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY || '',
+});
+
+// Create Arcjet instance for this route
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  rules: [
+    // Create a token bucket rate limit. Other algorithms are supported.
+    tokenBucket({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+      characteristics: ["userId"], // track requests by a custom user ID
+      refillRate: 5, // refill 5 tokens per interval
+      interval: 86400, // refill every 24 hours
+      capacity: 10, // bucket maximum capacity of 10 tokens
+    }),
+  ],
 });
 
 export async function POST(request: NextRequest) {
