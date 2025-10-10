@@ -1,13 +1,10 @@
 'use client';
 import { Button } from '@/components/ui/button';
-import { useConvex } from 'convex/react';
 import Link from 'next/link';
-import React, { use, useContext } from 'react'
+import React, { useContext } from 'react'
 import { useUserDetail } from '../provider';
-import { api } from '@/convex/_generated/api';
 import { TripInfo } from '../create-new-trip/_components/ChatBox';
-import Image from 'next/image';
-import { ArrowBigRightIcon } from 'lucide-react';
+import { getUserTrips } from '@/app/api/mongo-adapter';
 import MyTripCardItem from './_components/MyTripCardItem';
 
 export type Trip = {
@@ -19,7 +16,6 @@ export type Trip = {
 function MyTrips() {
     const [myTrips, setMyTrips] = React.useState<any[]>([]); // Replace 'any' with your trip type
     const { userDetail, setUserDetail } = useUserDetail();
-    const convex = useConvex();
 
     React.useEffect(() => {
         userDetail && GetUserTrip();
@@ -27,9 +23,8 @@ function MyTrips() {
 
     const GetUserTrip = async () => {
         try {
-            const result = await convex.mutation(api.tripDetails.GetUserTrip, { uid: userDetail?._id });
+            const result = await getUserTrips();
             setMyTrips(result);
-
         } catch (error) {
             console.error('Error fetching trips:', error);
         }

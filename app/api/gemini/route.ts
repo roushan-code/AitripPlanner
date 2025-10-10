@@ -99,36 +99,92 @@ const genAI = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY || '',
 });
 
-// // Create Arcjet instance for this route
-// const aj = arcjet({
-//   key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
-//   rules: [
-//     // Create a token bucket rate limit. Other algorithms are supported.
-//     tokenBucket({
-//       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-//       characteristics: ["userId"], // track requests by a custom user ID
-//       refillRate: 5, // refill 5 tokens per interval
-//       interval: 86400, // refill every 24 hours
-//       capacity: 10, // bucket maximum capacity of 10 tokens
-//     }),
-//   ],
-// });
+// Import MongoDB connection and models
+import dbConnect from '@/lib/mongodb/connect';
+import User from '@/lib/mongodb/models/User';
+
+// Rate limiting constants
+const FREE_TIER_DAILY_LIMIT = 5; // Number of requests for free tier
+const MONTHLY_PLAN = 'monthly';
 
 export async function POST(request: NextRequest) {
     const { messages, isFinal } = await request.json();
     const user = await currentUser();
-    const {has} = await auth();
-    const hasPremiumAccess = has({ plan: 'monthly' })
-    // const decision = await aj.protect(request, { userId: user?.primaryEmailAddress?.emailAddress ?? '', requested: isFinal ? 5 : 0 });
-
-    // console.log("Arcjet decision", decision);
-
-    // if (decision.conclusion === 'DENY' && !hasPremiumAccess) {
-    //     return NextResponse.json({ resp: "You have exceeded your daily limit. Please upgrade your plan.", ui: "Limit" });
-    // }
+    const { has } = await auth();
+    const hasPremiumAccess = has({ plan: MONTHLY_PLAN });
+    
+    // Check if user is authenticated
+    if (!user) {
+        return NextResponse.json({ 
+            resp: "You need to be logged in to use this feature.", 
+            ui: "auth" 
+        }, { status: 401 });
+    }
     
     try {
-        // Convert messages to Gemini format (only 'user' and 'model' roles allowed)
+        // Connect to MongoDB
+        await dbConnect();
+        
+        // Get or create user in our database
+        let dbUser = await User.findOne({ clerkId: user.id });
+        
+        if (!dbUser) {
+            // Create new user if not found
+            dbUser = await User.create({
+                name: user.firstName + ' ' + user.lastName,
+                email: user.emailAddresses[0].emailAddress,
+                imageUrl: user.imageUrl,
+                clerkId: user.id,
+                subscription: hasPremiumAccess ? MONTHLY_PLAN : 'free',
+                requestsCount: 0,
+                lastRequestDate: new Date()
+            });
+        }
+        
+        // Check if user has premium subscription from Clerk
+        if (hasPremiumAccess && dbUser.subscription !== MONTHLY_PLAN) {
+            // Update subscription status if needed
+            await User.findByIdAndUpdate(dbUser._id, {
+                subscription: MONTHLY_PLAN
+            });
+            dbUser.subscription = MONTHLY_PLAN;
+        }
+        
+        // Calculate daily requests for free tier users
+        if (!hasPremiumAccess && dbUser.subscription !== MONTHLY_PLAN) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Check if last request was from a previous day
+            if (!dbUser.lastRequestDate || dbUser.lastRequestDate < today) {
+                // Reset counter for a new day
+                await User.findByIdAndUpdate(dbUser._id, {
+                    requestsCount: 0,
+                    lastRequestDate: new Date()
+                });
+                dbUser.requestsCount = 0;
+            }
+            
+            // Check if user has exceeded daily limit for final trip generation
+            // Trip generations (isFinal=true) cost more tokens than regular chat
+            if (isFinal && dbUser.requestsCount >= FREE_TIER_DAILY_LIMIT) {
+                return NextResponse.json({ 
+                    resp: "You have reached your free tier daily limit for trip generation. Please upgrade to a premium plan for unlimited access.", 
+                    ui: "limit" 
+                });
+            }
+        }
+        
+        // If this is a final trip generation request and the request is allowed,
+        // increment the user's request count
+        if (isFinal) {
+            await User.findByIdAndUpdate(dbUser._id, {
+                $inc: { requestsCount: 1 },
+                lastRequestDate: new Date()
+            });
+    }
+    
+    // Convert messages to Gemini format (only 'user' and 'model' roles allowed)
         const geminiMessages = [];
         
         // Add system prompt as first user message if it's the first message

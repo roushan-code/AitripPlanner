@@ -9,10 +9,9 @@ import GroupSizeUi from './GroupSizeUi'
 import BudgetUi from './BudgetUi'
 import SelectDays from './SelectDays'
 import Final from './Final'
-import { useMutation } from 'convex/react'
-import { api } from '@/convex/_generated/api'
 import { useUserDetail, useTripDetail } from '@/app/provider'
 import { v4 as uuidv4 } from 'uuid';
+import { createTripDetails } from '@/app/api/mongo-adapter';
 
 type Message = {
     role: string;
@@ -26,8 +25,8 @@ export type TripInfo = {
     duration: string;
     origin: string;
     group_size: string;
-    hotels: any;
-    itinerary: any;
+    hotels: any[];
+    itinerary: any[];
 }
 
 export type Hotel = {
@@ -49,8 +48,7 @@ const ChatBox = () => {
     const [loading, setLoading] = React.useState<boolean>(false);
     const [isFinal, setIsFinal] = React.useState<boolean>(false);
     const [tripDetails, setTripDetails] = React.useState<TripInfo>();
-
-    const SaveTripDetails = useMutation(api.tripDetails.CreateTripDetails)
+    const [saving, setSaving] = React.useState<boolean>(false);
     const {userDetail, setUserDetail} = useUserDetail();
     const tripDetailContext = useTripDetail();
     const setGlobalTripDetail = tripDetailContext?.setTripDetailInfo;
@@ -143,22 +141,21 @@ const ChatBox = () => {
                         const dataSize = JSON.stringify(tripData).length;
                         console.log(`Saving trip data (${dataSize} bytes) with ID: ${tripId}`);
                         
-                        // If data is extremely large, consider truncating or breaking it down
-                        // Convex typically has a 1MB document size limit
-                        if (dataSize > 900000) { // ~900KB, leaving some buffer
-                            console.warn("Trip data exceeds 900KB, this may cause issues with database storage");
-                            
-                            // Consider implementing strategies to handle very large trip plans:
-                            // 1. Reduce image URLs or other large content
-                            // 2. Split data into multiple documents
-                            // 3. Store only essential information
+                        // MongoDB has a document size limit of 16MB, but we should still
+                        // be cautious with very large documents
+                        if (dataSize > 10000000) { // 10MB warning threshold
+                            console.warn("Trip data exceeds 10MB, this may cause issues with database storage");
                         }
                         
-                        await SaveTripDetails({
+                        setSaving(true);
+                        
+                        // Save trip using the MongoDB adapter
+                        await createTripDetails({
                             tripId: tripId,
-                            tripDetails: tripData,
-                            uid: userDetail._id
+                            tripDetails: tripData as TripInfo
                         });
+                        
+                        setSaving(false);
                         
                         console.log("Trip details saved successfully");
                         
@@ -170,6 +167,7 @@ const ChatBox = () => {
                         }]);
                         
                     } catch (savingError: any) {
+                        setSaving(false);
                         console.error("Error saving trip details:", savingError);
                         
                         // Show error message but don't disrupt the user experience

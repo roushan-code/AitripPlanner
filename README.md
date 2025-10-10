@@ -1,29 +1,32 @@
-## start convex database
-To start the convex database, run the following command in your terminal:
+# AI Trip Planner
 
-```bash 
-npx convex dev
-```
-
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app) that uses MongoDB for database storage and Gemini API for AI trip planning.
 
 ## Getting Started
 
-First, run the development server:
+1. Set up environment variables by copying `.env.local.example` to `.env.local` and filling in your credentials:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Required environment variables
+MONGODB_URI=your_mongodb_connection_string
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
+GEMINI_API_KEY=your_gemini_api_key
+NEXT_PUBLIC_MAPBOX_API_KEY=your_mapbox_api_key
 ```
-# In your local project
-npm install -g convex
-npx convex dev  # For development
-npx convex deploy  # For production
+
+2. Install dependencies and run the development server:
+
+```bash
+npm install
+npm run dev
+```
+
+3. (Optional) Seed the database with initial data:
+
+```bash
+npm run seed
+```
 
 <!-- Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 

@@ -3,15 +3,13 @@ import GlobalMap from '@/app/create-new-trip/_components/GlobalMap';
 import Itinerary from '@/app/create-new-trip/_components/Itinerary';
 import { Trip } from '@/app/my-trips/page';
 import { useTripDetail, useUserDetail, } from '@/app/provider';
-import { api } from '@/convex/_generated/api';
-import { useConvex } from 'convex/react';
+import { getTripById } from '@/app/api/mongo-adapter';
 import { useParams } from 'next/navigation';
 import React from 'react'
 
 const ViewTrip = () => {
   const { tripid } = useParams();
   const { userDetail, setUserDetail } = useUserDetail();
-  const convex = useConvex();
   const [tripData, setTripData] = React.useState<Trip>();
   const [isLoading, setIsLoading] = React.useState(true);
   //@ts-ignore
@@ -24,8 +22,7 @@ const ViewTrip = () => {
   const GetTrip = async () => {
     setIsLoading(true);
     try {
-      const result = await convex.query(api?.tripDetails?.GetTripById,
-        { uid: userDetail?._id, tripid: tripid + '' });
+      const result = await getTripById(tripid as string);
       setTripData(result);
       setTripDetailInfo(result?.tripDetails);
     } catch (error) {

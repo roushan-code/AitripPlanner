@@ -1,45 +1,46 @@
-import { api } from '@/convex/_generated/api';
 import { UserDetailContext } from '@/context/UserDetailContext';
 import { useUser } from '@clerk/nextjs';
-import { useMutation } from 'convex/react';
 import React, { useEffect, useState } from 'react'
 import Header from './_components/Header';
 import { TripDetailContext } from '@/context/TripDetailContext';
-import { TripInfo } from './create-new-trip/_components/ChatBox';
+import { getUserDetails, TripInfo } from './api/mongo-adapter';
 
 const provider = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
-
-  const CreateUser = useMutation(api.user.CreateNewUser);
-
   const [userDetail, setUserDetail] = useState<any>();
   const [tripDetailInfo, setTripDetailInfo] = useState<TripInfo | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const { user } = useUser();
 
   useEffect(() => {
-    user && CreateNewUser();
+    if (user) {
+      fetchUserDetails();
+    } else {
+      setLoading(false);
+    }
   }, [user])
 
-
-  const CreateNewUser = async () => {
-    // Create a new user in the database
-    if (user) {
-      const result = await CreateUser({
-        name: user?.fullName || "No Name",
-        imageUrl: user?.imageUrl || "",
-        email: user?.emailAddresses[0]?.emailAddress || "",
-      });
-      setUserDetail(result);
+  const fetchUserDetails = async () => {
+    try {
+      setLoading(true);
+      // This will create the user if they don't exist, or fetch if they do
+      const userData = await getUserDetails();
+      
+      if (userData) {
+        setUserDetail(userData);
+      }
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+    } finally {
+      setLoading(false);
     }
-    
-
   }
   return (
-    <UserDetailContext.Provider value={{ userDetail, setUserDetail }}>  
+    <UserDetailContext.Provider value={{ userDetail, setUserDetail, loading }}>  
       <TripDetailContext.Provider value={{tripDetailInfo, setTripDetailInfo}}>
       <div>
         <Header />

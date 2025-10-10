@@ -1,15 +1,13 @@
 "use client";
 
-import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ReactNode } from "react";
-import  Provider  from "./provider";
+import Provider from "./provider";
 
-const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-
+// Replaced ConvexProvider with direct Provider usage since we've migrated to MongoDB
 export function ConvexClientProvider({ children }: { children: ReactNode }) {
-    return <ConvexProvider client={convex}>
+    return (
         <Provider>
             {children}
         </Provider>
-    </ConvexProvider>;
+    );
 }

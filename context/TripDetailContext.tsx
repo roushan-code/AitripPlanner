@@ -1,4 +1,4 @@
-import { TripInfo } from '@/app/create-new-trip/_components/ChatBox';
+import { TripInfo } from '@/app/api/mongo-adapter';
 import {createContext} from 'react';
 
 export type TripContextType = {
