@@ -1,22 +1,16 @@
 // app/api/trips/[tripId]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { currentUser } from '@clerk/nextjs/server';
 import dbConnect from '@/lib/mongodb/connect';
 import TripDetails from '@/lib/mongodb/models/TripDetails';
 import User from '@/lib/mongodb/models/User';
 
-type Params = {
-  params: {
-    tripId: string;
-  };
-};
-
 export async function GET(
   request: NextRequest,
-  { params }: Params
+  { params }: { params: Promise<{ tripId: string }> }
 ) {
   try {
-    const { tripId } = params;
+    const { tripId } = await params;
     const user = await currentUser();
     
     if (!user) {
