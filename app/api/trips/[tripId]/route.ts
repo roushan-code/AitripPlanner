@@ -5,12 +5,18 @@ import dbConnect from '@/lib/mongodb/connect';
 import TripDetails from '@/lib/mongodb/models/TripDetails';
 import User from '@/lib/mongodb/models/User';
 
+type Params = {
+  params: {
+    tripId: string;
+  };
+};
+
 export async function GET(
   request: NextRequest,
-  context: { params: { tripId: string } }
+  { params }: Params
 ) {
   try {
-    const { tripId } = context.params;
+    const { tripId } = params;
     const user = await currentUser();
     
     if (!user) {
