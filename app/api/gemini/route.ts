@@ -118,14 +118,14 @@ export async function POST(request: NextRequest) {
     const { messages, isFinal } = await request.json();
     const user = await currentUser();
     const {has} = await auth();
-    const hasPremiumAccess = has({ plan: 'monthly' })
-    const decision = await aj.protect(request, { userId: user?.primaryEmailAddress?.emailAddress ?? '', requested: isFinal ? 5 : 0 });
+    // const hasPremiumAccess = has({ plan: 'monthly' })
+    // const decision = await aj.protect(request, { userId: user?.primaryEmailAddress?.emailAddress ?? '', requested: isFinal ? 5 : 0 });
 
     // console.log("Arcjet decision", decision);
 
-    if (decision.conclusion === 'DENY' && !hasPremiumAccess) {
-        return NextResponse.json({ resp: "You have exceeded your daily limit. Please upgrade your plan.", ui: "Limit" });
-    }
+    // if (decision.conclusion === 'DENY' && !hasPremiumAccess) {
+    //     return NextResponse.json({ resp: "You have exceeded your daily limit. Please upgrade your plan.", ui: "Limit" });
+    // }
     
     try {
         // Convert messages to Gemini format (only 'user' and 'model' roles allowed)
