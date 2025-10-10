@@ -47,18 +47,35 @@ const PlaceCardItem = ({activity}:Props) => {
             }
         }
   return (
-    <div  className="border rounded-lg p-4 shadow-sm flex flex-col justify-between">
-                <img src={photoUrl ? photoUrl : '/travel.webp'} loading='lazy' alt={activity.place_name} width={400} height={200} className='rounded-lg h-28 mb-2' />
-                <h3 className="font-semibold text-lg">{activity?.place_name}</h3>
-                <p className="text-gray-500 text-sm line-clamp-2">{activity?.place_details}</p>
-                <h2 className="flex gap-2 text-blue-500 text-sm pt-2 line-clamp-1"><Ticket width={35}/>{activity?.ticket_pricing}</h2>
-                <p className="flex text-center text-sm pt-2 gap-2 text-purple-500" ><Clock width={20}/> {activity?.time_travel_each_location}</p>
-                <p className="text-xs text-gray-500 mt-2">Best time to visit: {activity?.best_time_to_visit}</p>
-                <Link href={`https://www.google.com/maps/search/?api=1&query=${activity?.place_name}`} target='_blank' > 
-                <Button size={'sm'}  variant={'outline'} className='mt-2 w-full'>Explore More <ExternalLink/></Button>
-                </Link>
-                
-              </div>
+    <div className="border rounded-lg p-3 md:p-4 shadow-sm flex flex-col justify-between h-full">
+        <img 
+            src={photoUrl ? photoUrl : '/travel.webp'} 
+            loading='lazy' 
+            alt={activity.place_name} 
+            width={400} 
+            height={200} 
+            className='rounded-lg h-24 sm:h-28 w-full object-cover mb-2' 
+        />
+        <h3 className="font-semibold text-base md:text-lg line-clamp-1">{activity?.place_name}</h3>
+        <p className="text-gray-500 text-xs md:text-sm line-clamp-2 mt-1">{activity?.place_details}</p>
+        <h2 className="flex items-center gap-1 md:gap-2 text-blue-500 text-xs md:text-sm pt-2 line-clamp-1">
+            <Ticket className="h-4 w-4 md:h-5 md:w-5"/>
+            <span>{activity?.ticket_pricing}</span>
+        </h2>
+        <p className="flex items-center text-xs md:text-sm pt-1 md:pt-2 gap-1 md:gap-2 text-purple-500">
+            <Clock className="h-4 w-4 md:h-5 md:w-5"/> 
+            <span>{activity?.time_travel_each_location}</span>
+        </p>
+        <p className="text-xs text-gray-500 mt-1 md:mt-2">Best time to visit: {activity?.best_time_to_visit}</p>
+        <div className="mt-auto pt-2">
+            <Link href={`https://www.google.com/maps/search/?api=1&query=${activity?.place_name}`} target='_blank' className="w-full block"> 
+                <Button size={'sm'} variant={'outline'} className='w-full text-xs md:text-sm'>
+                    Explore More 
+                    <ExternalLink className="h-3 w-3 md:h-4 md:w-4 ml-1 md:ml-2"/>
+                </Button>
+            </Link>
+        </div>
+    </div>
   )
 }
 

@@ -166,21 +166,30 @@ const Itinerary = () => {
   const tripDetailContext = useTripDetail();
   const tripDetailInfo = tripDetailContext?.tripDetailInfo;
   const [tripData, setTripData] = useState<TripInfo|null>(tripDetailInfo || null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   // console.log('Trip Detail Info from context:', tripData);
 
   React.useEffect(() => {
     // Set trip data from context
     if (tripDetailInfo) {
-      setTripData(tripDetailInfo);
+      setIsLoading(true);
+      // Simulate a slight delay to allow for smoother transitions
+      const timer = setTimeout(() => {
+        setTripData(tripDetailInfo);
+        setIsLoading(false);
+      }, 500);
+      return () => clearTimeout(timer);
     }
   }, [tripDetailInfo]);
   const data = tripData ? [
     {
       title: "Recommanded Hotels",
       content: (
-        <div className='flex gap-2'>
+        <div className='flex flex-wrap gap-2 md:gap-4 overflow-x-scroll'>
           {tripData.hotels.map((hotel: any, index: number) => (
-            <HotelCardItem key={index} hotel={hotel} />
+            <div key={index} className="w-[17rem] ">
+              <HotelCardItem hotel={hotel} />
+            </div>
           ))}
         </div>
       ),
@@ -189,7 +198,7 @@ const Itinerary = () => {
       title: `Day ${dayPlan.day}`,
       content: (
         <div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {dayPlan.activities.map((activity: any, idx: number) => (
               <PlaceCardItem key={idx} activity={activity} />
             ))}
@@ -199,10 +208,21 @@ const Itinerary = () => {
     }))
   ] : [];
   return (
-    <div className="relative w-full overflow-clip ">
-      {tripData ? <Timeline data={data} tripData={tripData} /> : 
-      <Image src='/travel-world.webp' alt='Travel'  width={800} height={800} className='w-full h-full object-cover rounded-3xl '/>
-  } 
+    <div className="relative w-full overflow-clip">
+      {isLoading ? (
+        <div className='flex justify-center items-center py-8'>
+          <div className='text-center'>
+            <div className='inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]' role="status">
+              <span className='!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]'>Loading itinerary...</span>
+            </div>
+            <p className='mt-2 text-gray-600'>Loading itinerary details...</p>
+          </div>
+        </div>
+      ) : tripData ? (
+        <Timeline data={data} tripData={tripData} />
+      ) : (
+        <Image src='/travel-world.webp' alt='Travel' width={800} height={800} className='w-full h-full object-cover rounded-3xl' />
+      )}
     </div>
   );
 }

@@ -38,17 +38,24 @@ const HotelCardItem =  ({ hotel }: Props) => {
         
         
     return (
-    <div className="flex flex-col justify-between border rounded-lg p-4 shadow-sm cursor-pointer min-w-[280px] overflow-scroll">
-        <img src={photoUrl ? photoUrl : '/travel.webp'} loading='lazy' alt={hotel.hotel_name} width={400} height={200}  className='rounded-lg h-28 object-cover'  />
-        <h2 className='font-semibold text-lg mt-2'>{hotel?.hotel_name}</h2>
-        <h2 className='text-sm text-gray-500'>{hotel?.hotel_address}</h2>
-        <h2 className='flex text-sm text-green-500'><Wallet width={17}/>: {hotel?.price_per_night} / night</h2>
-        <div className='flex items-center mt-2'>
-            <span className='text-yellow-500'>{"★".repeat(Math.floor(hotel.rating))}</span>
-            <span className='text-gray-500 ml-2'>{hotel.rating} / 5</span>
+    <div className="flex flex-col justify-between border rounded-lg p-3 md:p-4 shadow-sm cursor-pointer w-full h-full overflow-hidden">
+        <img 
+            src={photoUrl ? photoUrl : '/travel.webp'} 
+            loading='lazy' 
+            alt={hotel.hotel_name} 
+            width={400} 
+            height={200}  
+            className='rounded-lg h-24 sm:h-28 w-full object-cover'  
+        />
+        <h2 className='font-semibold text-base md:text-lg mt-2 line-clamp-1'>{hotel?.hotel_name}</h2>
+        <h2 className='text-xs md:text-sm text-gray-500 line-clamp-2'>{hotel?.hotel_address}</h2>
+        <h2 className='flex items-center text-xs md:text-sm text-green-500 mt-1'><Wallet className="h-3 w-3 md:h-4 md:w-4 mr-1"/>: {hotel?.price_per_night} / night</h2>
+        <div className='flex items-center mt-1 md:mt-2'>
+            <span className='text-yellow-500 text-xs md:text-sm'>{"★".repeat(Math.floor(hotel.rating))}</span>
+            <span className='text-gray-500 ml-1 md:ml-2 text-xs md:text-sm'>{hotel.rating} / 5</span>
         </div>
-        <Link href={`https://www.google.com/maps/search/?api=1&query=${hotel?.hotel_name}`} target='_blank' >
-            <Button className='mt-2 w-full'>Book Now</Button>
+        <Link href={`https://www.google.com/maps/search/?api=1&query=${hotel?.hotel_name}`} target='_blank' className="mt-auto">
+            <Button className='mt-2 w-full text-xs md:text-sm' size="sm">Book Now</Button>
         </Link>
     </div>
   )
