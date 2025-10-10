@@ -99,26 +99,26 @@ const genAI = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY || '',
 });
 
-// Create Arcjet instance for this route
-const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
-  rules: [
-    // Create a token bucket rate limit. Other algorithms are supported.
-    tokenBucket({
-      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-      characteristics: ["userId"], // track requests by a custom user ID
-      refillRate: 5, // refill 5 tokens per interval
-      interval: 86400, // refill every 24 hours
-      capacity: 10, // bucket maximum capacity of 10 tokens
-    }),
-  ],
-});
+// // Create Arcjet instance for this route
+// const aj = arcjet({
+//   key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+//   rules: [
+//     // Create a token bucket rate limit. Other algorithms are supported.
+//     tokenBucket({
+//       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+//       characteristics: ["userId"], // track requests by a custom user ID
+//       refillRate: 5, // refill 5 tokens per interval
+//       interval: 86400, // refill every 24 hours
+//       capacity: 10, // bucket maximum capacity of 10 tokens
+//     }),
+//   ],
+// });
 
 export async function POST(request: NextRequest) {
     const { messages, isFinal } = await request.json();
     const user = await currentUser();
     const {has} = await auth();
-    // const hasPremiumAccess = has({ plan: 'monthly' })
+    const hasPremiumAccess = has({ plan: 'monthly' })
     // const decision = await aj.protect(request, { userId: user?.primaryEmailAddress?.emailAddress ?? '', requested: isFinal ? 5 : 0 });
 
     // console.log("Arcjet decision", decision);

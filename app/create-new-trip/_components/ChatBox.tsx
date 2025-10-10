@@ -118,32 +118,79 @@ const ChatBox = () => {
 
         if(isFinal && result?.data?.trip_plan){
             try {
-                setTripDetails(result.data.trip_plan);
-                // Set to global context
-                if (setGlobalTripDetail) {
-                    setGlobalTripDetail(result.data.trip_plan);
+                // Process and sanitize trip data before using it
+                const tripData = result.data.trip_plan;
+                
+                // Basic validation to ensure we have the essential fields
+                if (!tripData.destination || !tripData.duration || !tripData.origin) {
+                    throw new Error("Generated trip data is missing essential information");
                 }
                 
-                // Check if userDetail exists and has a valid _id before calling SaveTripDetails
+                // Set trip details locally
+                setTripDetails(tripData);
+                
+                // Set to global context if available
+                if (setGlobalTripDetail) {
+                    setGlobalTripDetail(tripData);
+                }
+                
+                // Only attempt to save if user is authenticated
                 if (userDetail && userDetail._id) {
                     try {
+                        const tripId = uuidv4();
+                        
+                        // Log size of data being saved for debugging
+                        const dataSize = JSON.stringify(tripData).length;
+                        console.log(`Saving trip data (${dataSize} bytes) with ID: ${tripId}`);
+                        
+                        // If data is extremely large, consider truncating or breaking it down
+                        // Convex typically has a 1MB document size limit
+                        if (dataSize > 900000) { // ~900KB, leaving some buffer
+                            console.warn("Trip data exceeds 900KB, this may cause issues with database storage");
+                            
+                            // Consider implementing strategies to handle very large trip plans:
+                            // 1. Reduce image URLs or other large content
+                            // 2. Split data into multiple documents
+                            // 3. Store only essential information
+                        }
+                        
                         await SaveTripDetails({
-                            tripId: uuidv4(),
-                            tripDetails: result.data.trip_plan,
+                            tripId: tripId,
+                            tripDetails: tripData,
                             uid: userDetail._id
                         });
+                        
                         console.log("Trip details saved successfully");
-                    } catch (error) {
-                        console.error("Error saving trip details:", error);
-                        // Still show a success message to the user as the trip was generated
-                        // even though it might not have been saved to the database
+                        
+                        // Add success message to the chat
+                        setMessage((prev: Message[]) => [...prev, {
+                            role: 'assistant',
+                            content: "Your trip has been generated and saved successfully!",
+                            ui: "final"
+                        }]);
+                        
+                    } catch (savingError: any) {
+                        console.error("Error saving trip details:", savingError);
+                        
+                        // Show error message but don't disrupt the user experience
+                        setMessage((prev: Message[]) => [...prev, {
+                            role: 'assistant',
+                            content: "Your trip was created, but I couldn't save it to your profile. You can still view the current details.",
+                            ui: "final"
+                        }]);
                     }
                 } else {
-                    console.error("Cannot save trip details: User ID is not available");
-                    // You might want to show an error message to the user here
+                    console.log("User not authenticated, trip details available but not saved");
+                    
+                    // Notify the user they can see the trip but it's not saved
+                    setMessage((prev: Message[]) => [...prev, {
+                        role: 'assistant',
+                        content: "Your trip has been generated! Sign in to save it to your profile.",
+                        ui: "final"
+                    }]);
                 }
-            } catch (error) {
-                console.error("Error processing trip data:", error);
+            } catch (processingError) {
+                console.error("Error processing trip data:", processingError);
                 setMessage((prev: Message[]) => [...prev, {
                     role: 'assistant',
                     content: "I generated your trip plan but encountered an error processing it. Please try again.",
