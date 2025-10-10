@@ -7,10 +7,10 @@ import User from '@/lib/mongodb/models/User';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { tripId: string } }
+  context: { params: { tripId: string } }
 ) {
   try {
-    const { tripId } = params;
+    const { tripId } = context.params;
     const user = await currentUser();
     
     if (!user) {
