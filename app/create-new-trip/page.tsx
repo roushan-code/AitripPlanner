@@ -15,7 +15,7 @@ import {
 const CreateNewTrip = () => {
   //@ts-ignore
   const { tripDetailInfo, setTripDetailInfo } = useTripDetail();
-  const [activeIndex, setActiveIndex] = React.useState(1);
+  const [activeIndex, setActiveIndex] = React.useState(0);
 
   useEffect(() => {
     setTripDetailInfo(null);

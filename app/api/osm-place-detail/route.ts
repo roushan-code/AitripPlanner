@@ -126,11 +126,11 @@ export async function POST(req: NextRequest) {
         
         // Strategy 3: Try Pexels as final fallback
         // console.log('📸 Trying Pexels...');
-        const pexelsImage = await getPexelsImage(placeName);
-        if (pexelsImage) {
-            // console.log(`✅ Pexels image found: ${pexelsImage}`);
-            return NextResponse.json(pexelsImage);
-        }
+        // const pexelsImage = await getPexelsImage(placeName);
+        // if (pexelsImage) {
+        //     // console.log(`✅ Pexels image found: ${pexelsImage}`);
+        //     return NextResponse.json(pexelsImage);
+        // }
         
         // No image found
         // console.log(`ℹ️ No images found for: ${placeName}`);
