@@ -272,6 +272,7 @@ export const BlurImage = ({
   src,
   className,
   alt,
+  blurDataURL, // Extract blurDataURL from props
   ...rest
 }: ImageProps) => {
   const [isLoading, setLoading] = useState(true);
@@ -288,7 +289,7 @@ export const BlurImage = ({
       height={height}
       loading="lazy"
       decoding="async"
-      blurDataURL={typeof src === "string" ? src : undefined}
+      // Removed blurDataURL as it's not a valid attribute for HTML img element
       alt={alt ? alt : "Background of a beautiful view"}
       {...rest}
     />

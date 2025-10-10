@@ -204,12 +204,43 @@ export async function POST(request: NextRequest) {
         }
         
         return NextResponse.json(jsonResponse);
-    } catch (error) {
-        console.log('Error in AI model route:', error);
+    } catch (error: any) {
+        console.error('Error in AI model route:', error);
+        
+        // Determine if it's a rate limit or quota issue
+        if (error.message?.includes('quota') || error.response?.status === 429) {
+            return NextResponse.json({
+                resp: "The AI service is experiencing high demand. Please try again in a moment.",
+                ui: '',
+                error: 'Rate limit or quota exceeded'
+            }, { status: 429 });
+        }
+        
+        // Handle network errors
+        if (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
+            return NextResponse.json({
+                resp: "Connection to AI service timed out. Please try again.",
+                ui: '',
+                error: 'Network error: ' + error.code
+            }, { status: 503 });
+        }
+        
+        // Handle Gemini API specific errors
+        if (error.response?.data?.error) {
+            const errorMessage = error.response.data.error.message || 'Unknown Gemini API error';
+            console.error('Gemini API error details:', error.response.data.error);
+            return NextResponse.json({
+                resp: "The AI service encountered an issue. Please try again later.",
+                ui: '',
+                error: errorMessage
+            }, { status: error.response.status || 500 });
+        }
+        
+        // Generic error fallback
         return NextResponse.json({
             resp: "I'm sorry, there was an error processing your request. Please try again later.",
             ui: '',
-            error: 'Failed to get response from AI model'
+            error: error.message || 'Failed to get response from AI model'
         }, { status: 500 });
     }
 }

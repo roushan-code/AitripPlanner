@@ -68,28 +68,88 @@ const ChatBox = () => {
 
         const updatedMessages = [...message, newMsg];
         setMessage(updatedMessages);
-        // Call API to send message to AI and get response
-        // console.log(updatedMessages);
-        const result = await axios.post('/api/gemini', { messages: updatedMessages, isFinal: isFinal });
-
-        !isFinal && setMessage((prev: Message[]) => [...prev, {
-            role: 'assistant',
-            content: result?.data?.resp,
-            ui: result?.data?.ui
-        }]);
-
-        if(isFinal){
-            setTripDetails(result?.data?.trip_plan);
-            // Set to global context
-            if (setGlobalTripDetail) {
-                setGlobalTripDetail(result?.data?.trip_plan);
+        
+        // Function to make API request with retry logic
+        const callGeminiAPI = async (retryCount = 0, maxRetries = 3) => {
+            try {
+                return await axios.post('/api/gemini', { 
+                    messages: updatedMessages, 
+                    isFinal: isFinal 
+                });
+            } catch (error: any) {
+                console.error(`API call failed (attempt ${retryCount + 1}):`, error.message);
+                
+                // If we haven't reached max retries, try again after a delay
+                if (retryCount < maxRetries) {
+                    // Exponential backoff - wait longer between each retry
+                    const delay = 1000 * Math.pow(2, retryCount);
+                    console.log(`Retrying in ${delay/1000} seconds...`);
+                    
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return callGeminiAPI(retryCount + 1, maxRetries);
+                }
+                
+                // If all retries failed, throw the error
+                throw error;
             }
-            await SaveTripDetails({
-                tripId: uuidv4(),
-                tripDetails: result?.data?.trip_plan,
-                uid: userDetail._id // TODO: replace with actual user id
-            });
+        };
+        
+        let result: any = null;
+        try {
+            result = await callGeminiAPI();
+            
+            !isFinal && setMessage((prev: Message[]) => [...prev, {
+                role: 'assistant',
+                content: result?.data?.resp,
+                ui: result?.data?.ui
+            }]);
+        } catch (error: any) {
+            // Handle final error after all retries failed
+            console.error("All API attempts failed:", error.message);
+            // Add error message to the chat
+            setMessage((prev: Message[]) => [...prev, {
+                role: 'assistant',
+                content: "I'm having trouble connecting right now. Please try again in a moment.",
+                ui: ""
+            }]);
+            setLoading(false);
+            return; // Exit the function early since we couldn't get a response
+        }
 
+        if(isFinal && result?.data?.trip_plan){
+            try {
+                setTripDetails(result.data.trip_plan);
+                // Set to global context
+                if (setGlobalTripDetail) {
+                    setGlobalTripDetail(result.data.trip_plan);
+                }
+                
+                // Check if userDetail exists and has a valid _id before calling SaveTripDetails
+                if (userDetail && userDetail._id) {
+                    try {
+                        await SaveTripDetails({
+                            tripId: uuidv4(),
+                            tripDetails: result.data.trip_plan,
+                            uid: userDetail._id
+                        });
+                        console.log("Trip details saved successfully");
+                    } catch (error) {
+                        console.error("Error saving trip details:", error);
+                        // Still show a success message to the user as the trip was generated
+                        // even though it might not have been saved to the database
+                    }
+                } else {
+                    console.error("Cannot save trip details: User ID is not available");
+                    // You might want to show an error message to the user here
+                }
+            } catch (error) {
+                console.error("Error processing trip data:", error);
+                setMessage((prev: Message[]) => [...prev, {
+                    role: 'assistant',
+                    content: "I generated your trip plan but encountered an error processing it. Please try again.",
+                    ui: ""
+                }]);
+            }
         }
         setLoading(false);
         // console.log(result)
@@ -122,6 +182,7 @@ const ChatBox = () => {
     useEffect(() => {
         if(isFinal && userInput){
             onSend()
+            
         }
     }, [isFinal]);
         

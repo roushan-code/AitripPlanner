@@ -29,18 +29,18 @@ const CreateNewTrip = () => {
       <div className='col-span-3 md:col-span-2 h-[85vh] pr-0'>
         {activeIndex === 0 ? <Iternary /> : <GlobalMap />}
 
-        <Tooltip >
-          <TooltipTrigger className='absolute bg-primary hover:bg-purple-600 bottom-10 left-[65%] transform -translate-x-1/2 cursor-pointer rounded-2xl'>
+        <Tooltip>
+          <TooltipTrigger asChild>
             <Button
               size={'lg'}
               onClick={() => setActiveIndex(activeIndex === 0 ? 1 : 0)}
-              
+              className='absolute bg-primary hover:bg-purple-600 bottom-10 left-[65%] transform -translate-x-1/2 cursor-pointer rounded-2xl'
             >
               {activeIndex === 0 ? <Plane /> : <Globe2 />}
             </Button>
           </TooltipTrigger>
           <TooltipContent className='bg-gray-800 text-white rounded-lg p-2'>
-            <p  >Switch Between Map and Trip Itinerary</p>
+            <p>Switch Between Map and Trip Itinerary</p>
           </TooltipContent>
         </Tooltip>
       </div>
