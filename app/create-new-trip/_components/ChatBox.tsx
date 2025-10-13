@@ -232,7 +232,7 @@ const ChatBox = () => {
     }, [isFinal]);
         
     return (
-        <div className='flex flex-col h-[85vh]'>
+        <div className='flex flex-col h-[100%]'>
             {/* Display Message */}
             {message.length === 0 && <EmptyBoxState onSelectOption={(v:string)=>{onSend(v)}} />}
             <section className='flex-1 overflow-y-auto p-4'>

@@ -9,7 +9,7 @@ import { usePathname } from 'next/navigation'
 const menuOptions = [
     { name: "Home", href: "/" },
     { name: "Pricing", href: "/pricing" },
-    { name: "Contact us", href: "/contact-us" },
+    { name: "Contact us", href: "/contact" },
 ]
 
 const Header = () => {
@@ -81,13 +81,13 @@ const Header = () => {
             <div className='hidden md:flex items-center gap-4'>
                 {!user ? <SignInButton mode='modal'>
                     <Button className='cursor-pointer'>Get Started</Button>
-                </SignInButton> : path !== '/create-new-trip' ? 
-                <Link href={'/my-trips'}>
-                    <Button className='cursor-pointer'>My Trips</Button>
-                </Link> :
+                </SignInButton> : (path === '/create-new-trip' || path === '/my-trips')  ? 
                     <Link href={'/create-new-trip'}>
                         <Button className='cursor-pointer'>Create New Trip</Button>
-                    </Link>
+                    </Link> : 
+                    <Link href={'/my-trips'}>
+                    <Button className='cursor-pointer'>My Trips</Button>
+                </Link>
                 }
                 <UserButton />
             </div>

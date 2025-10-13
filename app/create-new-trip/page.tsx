@@ -22,11 +22,11 @@ const CreateNewTrip = () => {
   }, [])
 
   return (
-    <div className='grid gird-cols-1 md:grid-cols-3 gap-5 px-10 h-[85vh]' >
+    <div className='grid gird-cols-1 md:grid-cols-3 gap-5 px-10 h-max' >
       <div >
         <ChatBox />
       </div>
-      <div className='col-span-3 md:col-span-2 h-[85vh] pr-0'>
+      <div className='col-span-3 md:col-span-2 h-[85vh] pr-0 flex items-center'>
         {activeIndex === 0 ? <Iternary /> : <GlobalMap />}
 
         <Tooltip>

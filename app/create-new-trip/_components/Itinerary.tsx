@@ -221,7 +221,7 @@ const Itinerary = () => {
       ) : tripData ? (
         <Timeline data={data} tripData={tripData} />
       ) : (
-        <Image src='/travel-world.webp' alt='Travel' width={800} height={800} className='w-full h-full object-cover rounded-3xl' />
+        <Image src='/travel-world.webp' alt='Travel' width={800} height={800} className='w-[85%] h-full object-cover rounded-3xl' />
       )}
     </div>
   );

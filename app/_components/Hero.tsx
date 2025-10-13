@@ -52,7 +52,7 @@ const Hero = () => {
                 <div>
                     <div className='flex relative border rounded-2xl p-3 md:p-4'>
                         <Textarea placeholder='Enter your destination, interests, and travel dates...' className='w-full h-16 md:h-24 bg-secondary/50 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 outline-none rounded-lg p-2 md:p-4 text-base md:text-lg resize-none' />
-                        <Button size={'icon'} className='absolute bottom-4 right-4 md:bottom-6 md:right-6' onClick={()=>onSend()}><Send className='h-4 w-4' /></Button>
+                        <Button size={'icon'} className='absolute bottom-4 w-[150px] right-4 md:bottom-6 md:right-6' onClick={()=>onSend()}>Create New Trip<Send className='h-4 w-4' /></Button>
                     </div>
                 </div>
                 {/* Suggestion Box */}
