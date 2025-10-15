@@ -22,27 +22,27 @@ const CreateNewTrip = () => {
   }, [])
 
   return (
-    <div className='grid gird-cols-1 md:grid-cols-3 gap-5 px-10 h-max' >
-      <div >
-        <ChatBox />
+    <div className='grid grid-cols-1 lg:grid-cols-3 gap-4 p-4 lg:p-10 h-[calc(200vh-100px)] overflow-hidden'>
+      <div className='h-[100vh] lg:h-full overflow-y-auto lg:col-span-1'>
+      <ChatBox />
       </div>
-      <div className='col-span-3 md:col-span-2 h-[85vh] pr-0 flex items-center'>
-        {activeIndex === 0 ? <Iternary /> : <GlobalMap />}
+      <div className='relative h-[100vh] lg:h-full overflow-y-auto lg:col-span-2'>
+      {activeIndex === 0 ? <Iternary /> : <GlobalMap />}
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size={'lg'}
-              onClick={() => setActiveIndex(activeIndex === 0 ? 1 : 0)}
-              className='absolute bg-primary hover:bg-purple-600 bottom-10 left-[65%] transform -translate-x-1/2 cursor-pointer rounded-2xl'
-            >
-              {activeIndex === 0 ? <Plane /> : <Globe2 />}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent className='bg-gray-800 text-white rounded-lg p-2'>
-            <p>Switch Between Map and Trip Itinerary</p>
-          </TooltipContent>
-        </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+        <Button
+          size={'lg'}
+          onClick={() => setActiveIndex(activeIndex === 0 ? 1 : 0)}
+          className='fixed lg:absolute bg-primary hover:bg-purple-600 bottom-6 right-6 lg:left-1/2 lg:-translate-x-1/2 cursor-pointer rounded-2xl z-10'
+        >
+          {activeIndex === 0 ? <Plane /> : <Globe2 />}
+        </Button>
+        </TooltipTrigger>
+        <TooltipContent className='bg-gray-800 text-white rounded-lg p-2'>
+        <p>Switch Between Map and Trip Itinerary</p>
+        </TooltipContent>
+      </Tooltip>
       </div>
     </div>
   )
