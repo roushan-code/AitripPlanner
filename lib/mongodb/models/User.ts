@@ -10,12 +10,11 @@ const userSchema = new Schema(
     subscription: { type: String, default: 'free' }, // free, monthly, yearly
     requestsCount: { type: Number, default: 0 },
     lastRequestDate: { type: Date },
-    clerkId: { type: String, required: true }, // Store Clerk user ID for reference
   },
   { timestamps: true }
 );
 
-// Add index with sparse option
-userSchema.index({ clerkId: 1 }, { unique: true, sparse: true });
+// Remove duplicate index - email is already unique in schema
+// userSchema.index({ email: 1 }, { unique: true });
 
 export default mongoose.models.User || mongoose.model('User', userSchema);

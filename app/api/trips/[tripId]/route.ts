@@ -1,6 +1,6 @@
 // app/api/trips/[tripId]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { currentUser } from '@clerk/nextjs/server';
+import { auth } from '@/lib/auth';
 import dbConnect from '@/lib/mongodb/connect';
 import TripDetails from '@/lib/mongodb/models/TripDetails';
 import User from '@/lib/mongodb/models/User';
@@ -11,16 +11,16 @@ export async function GET(
 ) {
   try {
     const { tripId } = await params;
-    const user = await currentUser();
+    const session = await auth();
     
-    if (!user) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
     
     await dbConnect();
     
     // Find the user in MongoDB
-    const dbUser = await User.findOne({ clerkId: user.id });
+    const dbUser = await User.findOne({ email: session.user.email });
     
     if (!dbUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });

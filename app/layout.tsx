@@ -2,15 +2,13 @@ import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
 import Provider from "./provider";
-import Headers from "./_components/Header";
-import { ClerkProvider } from "@clerk/nextjs";
-import { ConvexClientProvider } from "./ConvexClientProvider";
-import Footer from "./_components/Footer";
+import AuthProvider from "./_components/AuthProvider";
 
-const outfit = Roboto({
+const roboto = Roboto({
   subsets: ["latin"],
   weight: ["400", "700"],
-  variable: "--font-outfit",
+  variable: "--font-roboto",
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -24,21 +22,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    < ClerkProvider>
-      <html lang="en">
-        <body
-          className={`${outfit.className} font-sans bg-background text-foreground antialiased`}
-        >
-          <ConvexClientProvider>
-            <div className="min-h-screen flex flex-col">
-              <main className="flex-1">
-                {children}
-              </main>
-              <Footer />
-            </div>
-          </ConvexClientProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" className={roboto.variable}>
+      <body className="font-sans bg-background text-foreground antialiased">
+        <AuthProvider>
+          <Provider>
+            {children}
+          </Provider>
+        </AuthProvider>
+      </body>
+    </html>
   );
 }

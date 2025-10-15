@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button'
 import { HeroVideoDialog } from '@/components/ui/hero-video-dialog'
 import { Textarea } from '@/components/ui/textarea'
-import { useUser } from '@clerk/nextjs'
+import { useSession } from 'next-auth/react'
 import { ArrowDown, Globe2, Landmark,  LocateFixedIcon, Plane, Send } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { use } from 'react'
@@ -28,12 +28,12 @@ export const Suggestions = [
 ]
 
 const Hero = () => {
-    const {user} = useUser();
+    const { data: session } = useSession();
     const router = useRouter();
 
     const onSend = () => {
-        if(!user){
-            router.push('/sign-in')
+        if(!session?.user){
+            router.push('/auth/signin')
             return ;
         }
         // Navigate to Create trip planner page

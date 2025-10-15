@@ -1,9 +1,11 @@
+'use client'
 import { UserDetailContext } from '@/context/UserDetailContext';
-import { useUser } from '@clerk/nextjs';
+import { useSession } from 'next-auth/react';
 import React, { useEffect, useState } from 'react'
 import Header from './_components/Header';
 import { TripDetailContext } from '@/context/TripDetailContext';
 import { getUserDetails, TripInfo } from './api/mongo-adapter';
+import Footer from './_components/Footer';
 
 const provider = ({
   children,
@@ -14,15 +16,18 @@ const provider = ({
   const [tripDetailInfo, setTripDetailInfo] = useState<TripInfo | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const { user } = useUser();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
-    if (user) {
+    if (status === 'loading') return; // Still loading
+    
+    if (session?.user) {
       fetchUserDetails();
     } else {
       setLoading(false);
+      setUserDetail(null);
     }
-  }, [user])
+  }, [session, status])
 
   const fetchUserDetails = async () => {
     try {
@@ -45,6 +50,7 @@ const provider = ({
       <div>
         <Header />
         {children}
+        <Footer />
       </div>
       </TripDetailContext.Provider>
     </UserDetailContext.Provider>

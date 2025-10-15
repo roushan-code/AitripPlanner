@@ -22,8 +22,8 @@ const CreateNewTrip = () => {
   }, [])
 
   return (
-    <div className='grid grid-cols-1 lg:grid-cols-3 gap-4 p-4 lg:p-10 h-[calc(200vh-100px)] overflow-hidden'>
-      <div className='h-[100vh] lg:h-full overflow-y-auto lg:col-span-1'>
+    <div className='grid grid-cols-1 lg:grid-cols-3 gap-4 p-4 lg:p-10 h-[calc(200vh-100px)] lg:h-[calc(150vh-100px)] overflow-hidden'>
+      <div className=' h-[100vh] lg:h-full overflow-y-auto lg:col-span-1'>
       <ChatBox />
       </div>
       <div className='relative h-[100vh] lg:h-full overflow-y-auto lg:col-span-2'>

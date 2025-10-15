@@ -1,29 +1,29 @@
 // app/api/user/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { auth } from '@/lib/auth';
 import dbConnect from '@/lib/mongodb/connect';
 import User from '@/lib/mongodb/models/User';
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await currentUser();
+    const session = await auth();
     
-    if (!user) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
     
     await dbConnect();
     
     // Find or create user in MongoDB
-    let dbUser = await User.findOne({ clerkId: user.id });
+    let dbUser = await User.findOne({ email: session.user.email });
     
     if (!dbUser) {
       dbUser = await User.create({
-        name: user.firstName + ' ' + user.lastName,
-        email: user.emailAddresses[0].emailAddress,
-        imageUrl: user.imageUrl,
-        clerkId: user.id,
-        subscription: 'free'
+        name: session.user.name || 'User',
+        email: session.user.email,
+        imageUrl: session.user.image || '',
+        subscription: 'free',
+        requestsCount: 0
       });
     }
     

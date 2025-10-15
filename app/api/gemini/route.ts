@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenAI } from '@google/genai'
-import { auth, currentUser } from '@clerk/nextjs/server';
+import { auth } from '@/lib/auth';
 import arcjet, { tokenBucket } from "@arcjet/next";
 
 const systemPrompt = `
@@ -109,12 +109,10 @@ const MONTHLY_PLAN = 'monthly';
 
 export async function POST(request: NextRequest) {
     const { messages, isFinal } = await request.json();
-    const user = await currentUser();
-    const { has } = await auth();
-    const hasPremiumAccess = has({ plan: MONTHLY_PLAN });
+    const session = await auth();
     
     // Check if user is authenticated
-    if (!user) {
+    if (!session?.user) {
         return NextResponse.json({ 
             resp: "You need to be logged in to use this feature.", 
             ui: "auth" 
@@ -126,32 +124,22 @@ export async function POST(request: NextRequest) {
         await dbConnect();
         
         // Get or create user in our database
-        let dbUser = await User.findOne({ clerkId: user.id });
+        let dbUser = await User.findOne({ email: session.user.email });
         
         if (!dbUser) {
             // Create new user if not found
             dbUser = await User.create({
-                name: user.firstName + ' ' + user.lastName,
-                email: user.emailAddresses[0].emailAddress,
-                imageUrl: user.imageUrl,
-                clerkId: user.id,
-                subscription: hasPremiumAccess ? MONTHLY_PLAN : 'free',
+                name: session.user.name || 'User',
+                email: session.user.email,
+                imageUrl: session.user.image || '',
+                subscription: 'free',
                 requestsCount: 0,
                 lastRequestDate: new Date()
             });
         }
         
-        // Check if user has premium subscription from Clerk
-        if (hasPremiumAccess && dbUser.subscription !== MONTHLY_PLAN) {
-            // Update subscription status if needed
-            await User.findByIdAndUpdate(dbUser._id, {
-                subscription: MONTHLY_PLAN
-            });
-            dbUser.subscription = MONTHLY_PLAN;
-        }
-        
         // Calculate daily requests for free tier users
-        if (!hasPremiumAccess && dbUser.subscription !== MONTHLY_PLAN) {
+        if (dbUser.subscription !== MONTHLY_PLAN) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             

@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Simple in-memory cache to avoid repeated calls
+const imageCache = new Map<string, string>();
+const CACHE_EXPIRY = 1000 * 60 * 60; // 1 hour
+
+// Rate limiting to prevent API abuse
+const lastRequestTime = new Map<string, number>();
+const MIN_REQUEST_INTERVAL = 100; // 100ms between requests for same place
+
 async function getUnsplashImage(placeName: string): Promise<string> {
     try {
         const unsplashAccessKey = process.env.UNSPLASH_ACCESS_KEY;
         if (!unsplashAccessKey) {
-            // console.log('� Add UNSPLASH_ACCESS_KEY to .env.local for more images');
             return '';
         }
         
@@ -73,11 +80,31 @@ async function getPexelsImage(placeName: string): Promise<string> {
 export async function POST(req: NextRequest) {
     const { placeName } = await req.json();
     
+    if (!placeName) {
+        return NextResponse.json('');
+    }
+    
+    // Check cache first
+    const cacheKey = placeName.toLowerCase().trim();
+    if (imageCache.has(cacheKey)) {
+        const cachedImage = imageCache.get(cacheKey);
+        // console.log(`📋 Cache hit for: ${placeName}`);
+        return NextResponse.json(cachedImage);
+    }
+    
+    // Rate limiting check
+    const now = Date.now();
+    const lastRequest = lastRequestTime.get(cacheKey);
+    if (lastRequest && (now - lastRequest) < MIN_REQUEST_INTERVAL) {
+        // console.log(`⏳ Rate limited for: ${placeName}`);
+        return NextResponse.json('');
+    }
+    lastRequestTime.set(cacheKey, now);
+    
     try {
-        // console.log(`🔍 Searching for images: ${placeName}`);
+        // console.log(`� Searching for images: ${placeName}`);
         
         // Strategy 1: Try OpenStreetMap + Wikimedia first (free, high quality)
-        // console.log('📍 Trying OpenStreetMap + Wikimedia...');
         const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(placeName)}&format=json&addressdetails=1&extratags=1&limit=1`;
         
         const nominatimResponse = await fetch(nominatimUrl, {
@@ -94,8 +121,6 @@ export async function POST(req: NextRequest) {
                 const wikidataId = place.extratags?.wikidata;
                 
                 if (wikidataId) {
-                    // console.log(`🔗 Found Wikidata ID: ${wikidataId}`);
-                    
                     const wikimediaUrl = `https://www.wikidata.org/w/api.php?action=wbgetclaims&entity=${wikidataId}&property=P18&format=json`;
                     const wikimediaResponse = await fetch(wikimediaUrl);
                     
@@ -108,6 +133,8 @@ export async function POST(req: NextRequest) {
                             const encodedFileName = encodeURIComponent(imageFileName.replace(/ /g, '_'));
                             const imageUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodedFileName}?width=600`;
                             
+                            // Cache the result
+                            imageCache.set(cacheKey, imageUrl);
                             // console.log(`✅ Wikimedia image found: ${imageUrl}`);
                             return NextResponse.json(imageUrl);
                         }
@@ -117,27 +144,23 @@ export async function POST(req: NextRequest) {
         }
         
         // Strategy 2: Try Unsplash (high success rate)
-        // console.log('🖼️ Trying Unsplash...');
         const unsplashImage = await getUnsplashImage(placeName);
         if (unsplashImage) {
+            // Cache the result
+            imageCache.set(cacheKey, unsplashImage);
             // console.log(`✅ Unsplash image found: ${unsplashImage}`);
             return NextResponse.json(unsplashImage);
         }
         
-        // Strategy 3: Try Pexels as final fallback
-        // console.log('📸 Trying Pexels...');
-        // const pexelsImage = await getPexelsImage(placeName);
-        // if (pexelsImage) {
-        //     // console.log(`✅ Pexels image found: ${pexelsImage}`);
-        //     return NextResponse.json(pexelsImage);
-        // }
-        
-        // No image found
+        // No image found - cache empty result to avoid repeated requests
+        imageCache.set(cacheKey, '');
         // console.log(`ℹ️ No images found for: ${placeName}`);
         return NextResponse.json('');
         
     } catch (error: any) {
         console.error('❌ Error in image search:', error.message);
+        // Cache empty result on error
+        imageCache.set(cacheKey, '');
         return NextResponse.json('');
     }
 }
