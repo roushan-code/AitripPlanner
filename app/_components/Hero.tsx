@@ -76,7 +76,7 @@ const Hero = () => {
                     <HeroVideoDialog
                         className="block dark:hidden w-full max-w-2xl"
                         animationStyle="from-center"
-                        videoSrc="https://youtu.be/6JNA-semH8o?si=hZPBmYj7qqHHHLxH"
+                        videoSrc="https://player.cloudinary.com/embed/?cloud_name=ddxwcwxhl&public_id=Timeline_1_vhgoa4&profile=cld-default"
                         thumbnailSrc="/thumbnail.png"
                         thumbnailAlt="Dummy Video Thumbnail"
                     />
