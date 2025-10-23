@@ -1,76 +1,252 @@
-# AI Trip Planner
+# 🌍 AI Trip Planner
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app) that uses MongoDB for database storage and Gemini API for AI trip planning.
+> **Transform your travel dreams into perfectly planned adventures with AI-powered personalized itineraries!**
 
-## Getting Started
+AI Trip Planner is an intelligent travel companion that creates customized trip itineraries based on your preferences, budget, and travel style. Whether you're planning a romantic getaway, family vacation, or solo adventure, our AI creates detailed day-by-day plans with accommodations, activities, and insider tips.
 
-1. Set up environment variables by copying `.env.local.example` to `.env.local` and filling in your credentials:
+## ✨ Features
 
+### 🤖 **AI-Powered Trip Planning**
+- **Smart Itinerary Generation**: Get personalized day-by-day travel plans
+- **Interactive Chat Interface**: Refine your trip through conversational AI
+- **Budget-Aware Recommendations**: Plans tailored to your spending preferences
+- **Group Size Optimization**: Perfect plans for solo, couple, family, or group travel
+
+### 🎯 **Intelligent Recommendations**
+- **Hotel & Accommodation Suggestions**: Curated stays with ratings and pricing
+- **Activity & Attraction Planning**: Must-see spots and hidden gems
+- **Restaurant & Dining**: Local cuisine recommendations
+- **Real-time Image Integration**: Visual previews of destinations and accommodations
+
+### 💼 **User Experience**
+- **Secure Authentication**: Google OAuth integration with NextAuth.js
+- **Trip Management**: Save, edit, and manage multiple trip plans
+- **Responsive Design**: Perfect experience on desktop and mobile
+- **Dark/Light Mode**: Comfortable viewing in any environment
+
+### 🗺️ **Travel Tools**
+- **Interactive Maps**: Visualize your itinerary geographically
+- **Popular Destinations**: Curated list of trending travel spots
+- **Real-time Pricing**: Up-to-date accommodation and activity costs
+- **Export & Share**: Save and share your trip plans easily
+
+## 🚀 Demo
+
+
+<!-- 
+🎬 **Demo Video Coming Soon!** 
+Add your demo video link or embed here to showcase the AI Trip Planner in action.
+
+
+*Click above to watch the full demo video*
+-->
+
+## 🛠️ Tech Stack
+
+### **Frontend**
+- **⚛️ Next.js 15.5.3** - React framework with App Router
+- **🎨 Tailwind CSS** - Utility-first CSS framework
+- **🔧 TypeScript** - Type-safe development
+- **🎪 Framer Motion** - Smooth animations and interactions
+- **🎭 Lucide React** - Beautiful icons and UI elements
+
+### **Backend & Database**
+- **🍃 MongoDB** - NoSQL database with Mongoose ODM
+- **🔐 NextAuth.js** - Authentication with Google OAuth
+- **🌐 Next.js API Routes** - Serverless backend functions
+
+### **AI & External Services**
+- **🧠 Google Gemini AI** - Advanced AI for trip planning
+- **📷 Unsplash API** - High-quality destination images
+- **📸 Pexels API** - Additional image resources
+- **🗺️ OpenStreetMap** - Map data and location services
+- **🛡️ Arcjet** - Rate limiting and security
+
+### **Deployment & Tools**
+- **▲ Vercel** - Deployment platform (recommended)
+- **📦 NPM** - Package management
+- **🔍 ESLint** - Code quality and consistency
+
+## ⚡ Quick Start
+
+### **Prerequisites**
+- Node.js 18.0 or later
+- MongoDB database (local or cloud)
+- Google OAuth credentials
+- Gemini AI API key
+
+### **1. Clone the Repository**
 ```bash
-# Required environment variables
-MONGODB_URI=your_mongodb_connection_string
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-CLERK_SECRET_KEY=your_clerk_secret_key
-GEMINI_API_KEY=your_gemini_api_key
-NEXT_PUBLIC_MAPBOX_API_KEY=your_mapbox_api_key
+git clone https://github.com/roushan-code/AitripPlanner.git
+cd ai_trip_planner
 ```
 
-2. Install dependencies and run the development server:
-
+### **2. Install Dependencies**
 ```bash
 npm install
+```
+
+### **3. Environment Setup**
+Create a `.env.local` file in the root directory:
+
+```bash
+# Database
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/aitrip
+
+# NextAuth Configuration
+NEXTAUTH_SECRET=your-secure-random-secret-here
+NEXTAUTH_URL=http://localhost:3000
+
+# Google OAuth (Get from Google Cloud Console)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# AI Services
+GEMINI_API_KEY=your-gemini-api-key
+
+# Image APIs (Optional - for better image results)
+UNSPLASH_ACCESS_KEY=your-unsplash-access-key
+PEXELS_API_KEY=your-pexels-api-key
+
+# Security (Optional)
+ARCJET_KEY=your-arcjet-api-key
+```
+
+### **4. Start Development Server**
+```bash
 npm run dev
 ```
 
-3. (Optional) Seed the database with initial data:
+Open [http://localhost:3000](http://localhost:3000) to see your AI Trip Planner in action! 🎉
 
-```bash
-npm run seed
+## 🎯 How It Works
+
+### **1. 🗣️ Tell Us Your Dreams**
+Simply describe your ideal trip - destination, duration, budget, and travel style. Our AI understands natural language!
+
+### **2. 🤖 AI Creates Your Plan**
+Our advanced AI analyzes your preferences and generates a personalized itinerary with:
+- Daily activity schedules
+- Accommodation recommendations
+- Restaurant suggestions
+- Transportation options
+- Budget breakdowns
+
+### **3. 🎨 Customize & Refine**
+Chat with our AI to modify your plan:
+- Add or remove activities
+- Adjust budget ranges
+- Change accommodation preferences
+- Modify trip duration
+
+### **4. 📱 Save & Share**
+Save your trips to your account and share them with travel companions!
+
+## 🚀 API Endpoints
+
+### **Trip Planning**
+- `POST /api/gemini` - AI-powered trip generation
+- `GET /api/trips/user` - Get user's saved trips
+- `POST /api/trips/create` - Save new trip plan
+
+### **User Management**
+- `GET /api/user` - Get user profile
+- `POST /api/user` - Update user information
+
+### **Image Services**
+- `POST /api/osm-place-detail` - Get destination images
+
+## 📁 Project Structure
+
+```
+ai_trip_planner/
+├── app/                          # Next.js App Router
+│   ├── _components/              # Reusable React components
+│   ├── api/                      # API routes
+│   ├── auth/                     # Authentication pages
+│   ├── create-new-trip/          # Trip creation flow
+│   └── my-trips/                 # User's saved trips
+├── components/                   # UI components
+│   └── ui/                       # Shadcn/ui components
+├── lib/                          # Utility functions
+│   ├── auth.ts                   # NextAuth configuration
+│   └── mongodb/                  # Database models & connection
+├── public/                       # Static assets
+└── hooks/                        # Custom React hooks
 ```
 
-<!-- Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🔧 Configuration Guide
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### **Google OAuth Setup**
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing
+3. Enable Google+ API
+4. Create OAuth 2.0 Client ID
+5. Add authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### **MongoDB Setup**
+1. Create account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Create new cluster
+3. Get connection string
+4. Add to `MONGODB_URI` in `.env.local`
 
-## Learn More
+### **Gemini AI Setup**
+1. Visit [Google AI Studio](https://aistudio.google.com/)
+2. Generate API key
+3. Add to `GEMINI_API_KEY` in `.env.local`
 
-To learn more about Next.js, take a look at the following resources:
+## 🚢 Deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### **Deploy to Vercel (Recommended)**
+1. Push your code to GitHub
+2. Connect your repo to [Vercel](https://vercel.com)
+3. Add environment variables in Vercel dashboard
+4. Deploy automatically on every push!
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### **Other Deployment Options**
+- **Netlify**: Static deployment with serverless functions
+- **Railway**: Full-stack deployment with database
+- **Docker**: Containerized deployment
 
-## Deploy on Vercel
+## 🤝 Contributing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+We welcome contributions! Please follow these steps:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Fork the repository**
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Commit your changes**: `git commit -m 'Add amazing feature'`
+4. **Push to the branch**: `git push origin feature/amazing-feature`
+5. **Open a Pull Request**
 
+### **Development Guidelines**
+- Follow TypeScript best practices
+- Use meaningful commit messages
+- Add tests for new features
+- Update documentation as needed
 
-<div className="flex flex-col justify-between border rounded-lg p-4 shadow-sm cursor-pointer min-w-[280px]">
-            <img 
-                src={hotel.hotel_image_url} 
-                alt={hotel.hotel_name} 
-                width={400} 
-                height={200} 
-                className='rounded-lg h-28 object-cover' 
-                onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/placeholder-hotel.jpg';
-                }}
-            />
-            <h2 className='font-semibold text-lg mt-2'>{hotel?.hotel_name}</h2>
-            <h2 className='text-sm text-gray-500'>{hotel?.hotel_address}</h2>
-            <h2 className='flex text-sm text-green-500'>
-                <Wallet width={17}/> {hotel?.price_per_night} / night
-            </h2>
-            <div className='flex items-center mt-2'>
-                <span className='text-yellow-500'>{"★".repeat(Math.floor(hotel.rating))}</span>
-                <span className='text-gray-500 ml-2'>{hotel.rating} / 5</span>
-            </div>
-            <Link href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(hotel?.hotel_name + ' ' + hotel?.hotel_address)}`} target='_blank'>
-                <Button className='mt-2 w-full'>Book Now</Button>
-            </Link>
-        </div> -->
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Google Gemini AI** for intelligent trip planning
+- **Next.js Team** for the amazing framework
+- **Vercel** for seamless deployment
+- **MongoDB** for flexible data storage
+- **Unsplash & Pexels** for beautiful destination images
+
+## 📧 Contact & Support
+
+- **GitHub Issues**: [Report bugs or request features](https://github.com/roushan-code/AitripPlanner/issues)
+- **Developer**: [@roushan-code](https://github.com/roushan-code)
+
+---
+
+<div align="center">
+
+**⭐ Star this repo if you find it useful! ⭐**
+
+Made with ❤️ by [Roushan](https://github.com/roushan-code)
+
+</div>
