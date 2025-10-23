@@ -33,13 +33,9 @@ AI Trip Planner is an intelligent travel companion that creates customized trip 
 ## 🚀 Demo
 
 
-<!-- 
-🎬 **Demo Video Coming Soon!** 
-Add your demo video link or embed here to showcase the AI Trip Planner in action.
+https://github.com/user-attachments/assets/c79b4894-e4e6-4178-b7ca-b4f59486b4e3
 
 
-*Click above to watch the full demo video*
--->
 
 ## 🛠️ Tech Stack
 
